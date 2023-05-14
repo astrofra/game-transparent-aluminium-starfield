@@ -14,7 +14,7 @@ The game is implemented in [Squirrel](https://github.com/albertodemichelis/squir
 - Music: BMcC
 - Code: Astrofra
 
-## About BIGJam (Berlin Indie Game Jam) 
+## About BIGJam (Berlin Indie Game Jam) :tiger:
 
 BIGJam was a gathering for indie game developers held in Berlin from July 31 to August 3, 2009, where artists, musicians, and programmers collaborated on creative projects in a café setting ([ST OBERHOLZ, BERLIN](https://sanktoberholz.coffee/)). Participants could engage in loosely themed 3-hour game competitions and work on their own ideas, while networking with like-minded, talented individuals.
 
