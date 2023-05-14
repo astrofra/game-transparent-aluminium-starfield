@@ -1,0 +1,43 @@
+<NML=1.0>
+<Geometry=
+	<RenderWord>
+	<Vertex=
+		<Count=6>
+		<Data==73:72@
+***j*******ª***ê***************jXçåÝ*******êXçå]****XçåÝ***ê****
+Xçå]***j>
+	>
+	<Polygon=
+		<Count=8>
+		<BindingCount=24>
+		<Data==162:160@
+-***-***.***********-***,***/***********-***,***.***+*******-***
+-***/***+*******-*******.***,*******-***+***/***,*******-***+***
+.***-*******-*******/***-*******>
+	>
+	<PNormal=
+		<Count=8>
+		<Data==24:24@
+sáásssásááásssáássááásás>
+	>
+	<VNormal=
+		<Count=24>
+		<Data==73:72@
+*«***«©***©***©©***©***««***«***©«**©****«*©*«****©*©*«****«*«*©
+****©*«*>
+	>
+	<Materials=
+		<Material=
+			<Id="default">
+			<Glossiness=1.000000>
+			<PhysicMaterial=
+				<StaticFriction=0.750000>
+				<DynamicFriction=0.500000>
+				<Restitution=0.100000>
+			>
+			<RenderMask=
+				<Smoothing>
+			>
+		>
+	>
+>

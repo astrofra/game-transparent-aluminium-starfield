@@ -1,0 +1,425 @@
+<NML = 1.0>
+
+<Shader =
+	<Name = "core::velocity">
+
+	<Vertex = "
+		uniform	mat4		view_previous_matrix, model_previous_matrix;
+		varying	vec4		view, previous_view;
+
+		void	main()
+		{
+			previous_view = gl_ProjectionMatrix * view_previous_matrix * model_previous_matrix * gl_Vertex;
+			view = gl_ModelViewProjectionMatrix * gl_Vertex;
+			gl_Position = view;
+		}
+	">
+	<Pixel = "
+		varying	vec4		view, previous_view;
+
+		void	main()
+		{
+			vec2	velocity = ((previous_view.xy / previous_view.w) - (view.xy / view.w)) * 0.5;
+			float	vlen = length(velocity);
+			if	(vlen > 0.015)
+				velocity *= 0.015 / vlen;
+			gl_FragColor = vec4(velocity, 0.0, 0.0);
+		}
+	">
+>
+
+<Shader =
+	<Name = "core::fog">
+	<Vertex = "
+		void	main()
+		{
+			gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
+		}
+	">
+	<Pixel = "
+		uniform	vec2		inverse_buffer_size;
+		uniform	sampler2D	gbuffer0;
+
+		uniform	vec3		color;
+		uniform float		near, inverse_range;
+
+		void	main()
+		{
+			vec2	UV = vec2(gl_FragCoord.x, gl_FragCoord.y) * inverse_buffer_size;
+			float	z = texture2D(gbuffer0, UV).w;
+			gl_FragColor = vec4(color, clamp(1.0 - (z - near) * inverse_range, 0.0, 1.0));
+		}
+	">
+>
+
+<Shader =	// Crease SSAO
+	<Name = "core::ssao">
+	<Vertex = "
+		void	main()
+		{
+			gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
+		}
+	">
+	<Pixel = "
+		uniform	vec2		inverse_buffer_size, display_buffer_ratio, inverse_projection_2d;
+		uniform	sampler2D	nrm_dpth, noise_texture;
+		uniform float		framebuffer_fx_scaler, view_depth_offset;
+
+		void	main()
+		{
+			vec2	UV = vec2(gl_FragCoord.x, gl_FragCoord.y) * framebuffer_fx_scaler * inverse_buffer_size;
+			vec4	nz = texture2D(nrm_dpth, UV);
+
+			float	depth = nz.w;
+			vec4	output_fragment;
+float   SSAORadius = 2.0;
+			// No AO farther than 100 meters.
+			if	(depth > 100.0)
+				output_fragment = vec4(1.0, 1.0, 1.0, 1.0);
+
+			else
+			{
+				vec3	normal = nz.xyz;
+
+				// Unpack depth and compute fragment position in view space.
+				vec3	svc = vec3((((UV * display_buffer_ratio) - vec2(0.5, 0.5)) * 2.0) * inverse_projection_2d, 1.0);
+				vec3	view_pos = svc * (depth + view_depth_offset);
+
+				// Initial random UV.
+				vec2    noise_uv = UV / 128.0 * (display_buffer_ratio / inverse_buffer_size);
+
+				// Compute visibility factor.
+				float   k = 0.0;
+				for (int n = 0; n < 1; ++n)
+				{
+					// Get the next random vector.
+					vec3	rand_vector = normalize(texture2D(noise_texture, noise_uv).xyz);
+					noise_uv += rand_vector.xy;
+
+					// Stay above the surface.
+					if  (dot(rand_vector, normal) < 0.0) rand_vector = -rand_vector;
+
+					// Perform lookup.
+					vec3    lookup_pos = view_pos;// + rand_vector;
+					vec4	lookup_pj = gl_ProjectionMatrix * vec4(lookup_pos, 1.0);
+					vec2	lookup_uv = (lookup_pj.xy / lookup_pj.w) * inverse_buffer_size * 0.01 + 0.5;
+
+					float   lookup_depth = texture2D(nrm_dpth, lookup_uv).w;
+
+					// Visibility.
+			        k += lookup_depth / 100.0;//min(abs((depth + lookup_depth) / SSAORadius + 1.0), 1.0);
+				}
+//				k /= 32.0;
+/*
+	
+				// Distance scale.
+				vec2	kk = inverse_buffer_size * 1500.0 / max(z, 1.0);
+	
+				// Dithering matrix.
+				vec4	noise = texture2D(noise_texture, UV / 128.0 * (display_buffer_ratio / inverse_buffer_size));
+				float	a = (noise.x + noise.y + noise.z);
+				mat2	mat = mat2(cos(a) * display_buffer_ratio.x, -sin(a) * display_buffer_ratio.y, sin(a) * display_buffer_ratio.x, cos(a) * display_buffer_ratio.y);
+	
+				float	k = (
+								SSAO(UV, (vec2(-0.5,  -0.5) * mat) * kk, n, vp, noise.x) +
+								SSAO(UV, (vec2(-0.25, -0.5) * mat) * kk, n, vp, noise.y) +
+								SSAO(UV, (vec2( 0.25, -0.5) * mat) * kk, n, vp, noise.z) +
+								SSAO(UV, (vec2( 0.5,  -0.5) * mat) * kk, n, vp, noise.w) +
+	
+								SSAO(UV, (vec2(-0.5,  -0.25) * mat) * kk, n, vp, noise.x) +
+								SSAO(UV, (vec2(-0.25, -0.25) * mat) * kk, n, vp, noise.y) +
+								SSAO(UV, (vec2( 0.25, -0.25) * mat) * kk, n, vp, noise.z) +
+								SSAO(UV, (vec2( 0.5,  -0.25) * mat) * kk, n, vp, noise.w) +
+	
+								SSAO(UV, (vec2(-0.5,   0.25) * mat) * kk, n, vp, noise.x) +
+								SSAO(UV, (vec2(-0.25,  0.25) * mat) * kk, n, vp, noise.y) +
+								SSAO(UV, (vec2( 0.25,  0.25) * mat) * kk, n, vp, noise.z) +
+								SSAO(UV, (vec2( 0.5,   0.25) * mat) * kk, n, vp, noise.w) +
+	
+								SSAO(UV, (vec2(-0.5,   0.5) * mat) * kk, n, vp, noise.x) +
+								SSAO(UV, (vec2(-0.25,  0.5) * mat) * kk, n, vp, noise.y) +
+								SSAO(UV, (vec2( 0.25,  0.5) * mat) * kk, n, vp, noise.z) +
+								SSAO(UV, (vec2( 0.5,   0.5) * mat) * kk, n, vp, noise.w)
+							) / 16.0;
+	
+				k = 1.0 - k;
+				k = (k < 0.725) ? k * k : k;
+
+				// Blend to no AO in the distance.
+				float	attn = 1.0 - max((z - 90.0) / 10.0, 0.0);
+				k = k * attn + (1.0 - attn);
+*/
+				output_fragment = vec4(k, k, k, 1.0);
+			}
+			gl_FragColor = output_fragment;
+		}
+	">
+>
+
+<Shader =
+	<Name = "core::motionblur">
+	<Vertex = "
+		void	main()
+		{
+			gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
+		}
+	">
+
+	<Pixel = "
+		uniform	vec2		inverse_buffer_size, inverse_display_size;
+		uniform	sampler2D	pp_input, velocity_map, nrm_dpth;
+
+		//-------------------------------------------
+		vec4	sample(vec2 UV, vec2 dt, float depth)
+		{
+			float	c_depth = texture2D(nrm_dpth, UV + dt).w;
+			return ((c_depth - depth) < -0.1) ? texture2D(pp_input, UV) : texture2D(pp_input, UV + dt);
+		}
+
+		//--------------------
+		vec4	mblur(vec2 UV)
+		{
+			vec2	dt = texture2D(velocity_map, vec2(gl_FragCoord.x, gl_FragCoord.y) * inverse_display_size).xy;
+			float	depth = texture2D(nrm_dpth, UV).w;
+
+			return vec4(	(
+								sample(UV, dt * 0.1, depth) +
+								sample(UV, dt * 0.2, depth) +
+								sample(UV, dt * 0.3, depth) +
+								sample(UV, dt * 0.4, depth) +
+								sample(UV, dt * 0.5, depth) +
+								sample(UV, dt * 0.6, depth) +
+								sample(UV, dt * 0.7, depth) +
+								sample(UV, dt * 0.8, depth)
+							) / 8.0	);
+		}
+
+		//------------
+		void	main()
+		{
+			vec2	UV = vec2(gl_FragCoord.x, gl_FragCoord.y) * inverse_buffer_size;
+			gl_FragColor = mblur(UV);
+		}
+	">
+>
+
+<Shader =
+	<Name = "core::h_dof">
+	<Vertex = "
+		void	main()
+		{
+			gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
+		}
+	">
+	<Pixel = "
+		uniform	float		framebuffer_fx_scaler, f_stop, focal_distance, blur_size;
+		uniform	vec2		inverse_buffer_size, direction;
+		uniform	sampler2D	source, nrm_dpth;
+
+		vec4	sample(vec2 UV, vec2 dt, float texel_depth, float dof_factor)
+		{	return texture2D(source, UV + dt);	}
+
+		void	main()
+		{
+			vec2	UV = vec2(gl_FragCoord.x, gl_FragCoord.y) * inverse_buffer_size * framebuffer_fx_scaler;
+
+			float	texel_depth = texture2D(nrm_dpth, UV).w;
+			float	dof_factor = abs(texel_depth - focal_distance) / f_stop;
+			float	blur_factor = min(dof_factor / (framebuffer_fx_scaler * 1500.0), 0.0013) * blur_size * 0.5;
+
+			vec4	txl =
+			(
+				sample(UV, vec2(blur_factor * -1.0, 0.0), texel_depth, dof_factor) * 0.2 +
+				sample(UV, vec2(blur_factor * -0.82, 0.0), texel_depth, dof_factor) * 0.45 +
+				sample(UV, vec2(blur_factor * -0.66, 0.0), texel_depth, dof_factor) * 0.7 +
+				sample(UV, vec2(blur_factor * -0.5, 0.0), texel_depth, dof_factor) * 0.9 +
+				sample(UV, vec2(blur_factor * -0.33, 0.0), texel_depth, dof_factor) * 0.9 +
+				sample(UV, vec2(blur_factor * -0.16, 0.0), texel_depth, dof_factor) * 0.95 +
+				sample(UV, vec2(blur_factor *  0.0, 0.0), texel_depth, dof_factor) * 1.0 +
+				sample(UV, vec2(blur_factor *  0.16, 0.0), texel_depth, dof_factor) * 0.95 +
+				sample(UV, vec2(blur_factor *  0.33, 0.0), texel_depth, dof_factor) * 0.9 +
+				sample(UV, vec2(blur_factor *  0.5, 0.0), texel_depth, dof_factor) * 0.9 +
+				sample(UV, vec2(blur_factor *  0.66, 0.0), texel_depth, dof_factor) * 0.7 +
+				sample(UV, vec2(blur_factor *  0.82, 0.0), texel_depth, dof_factor) * 0.45 +
+				sample(UV, vec2(blur_factor *  1.0, 0.0), texel_depth, dof_factor) * 0.2
+			)	/	9.2;
+
+			gl_FragColor = vec4(txl.rgb, 1.0 - min(dof_factor, 1.0));
+		}
+	">
+>
+
+<Shader =
+	<Name = "core::v_dof">
+	<Vertex = "
+		void	main()
+		{
+			gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
+		}
+	">
+	<Pixel = "
+		uniform	float		framebuffer_fx_scaler, f_stop, focal_distance, blur_size;
+		uniform	vec2		inverse_buffer_size, direction;
+		uniform	sampler2D	source, nrm_dpth;
+
+		//-------------------------------------------------------------------
+		vec4	sample(vec2 UV, vec2 dt, float texel_depth, float dof_factor)
+		{	return texture2D(source, UV + dt);	}
+
+		void	main()
+		{
+			vec2	UV = vec2(gl_FragCoord.x, gl_FragCoord.y) * inverse_buffer_size * framebuffer_fx_scaler;
+
+			float	texel_depth = texture2D(nrm_dpth, UV).w;
+			float	dof_factor = abs(texel_depth - focal_distance) / f_stop;
+			float	blur_factor = min(dof_factor / (framebuffer_fx_scaler * 1500.0), 0.0013) * blur_size * 0.5;
+
+			vec4	txl =
+			(
+				sample(UV, vec2(0.0, blur_factor * -1.0), texel_depth, dof_factor) * 0.2 +
+				sample(UV, vec2(0.0, blur_factor * -0.82), texel_depth, dof_factor) * 0.45 +
+				sample(UV, vec2(0.0, blur_factor * -0.66), texel_depth, dof_factor) * 0.7 +
+				sample(UV, vec2(0.0, blur_factor * -0.5), texel_depth, dof_factor) * 0.9 +
+				sample(UV, vec2(0.0, blur_factor * -0.33), texel_depth, dof_factor) * 0.9 +
+				sample(UV, vec2(0.0, blur_factor * -0.16), texel_depth, dof_factor) * 0.95 +
+				sample(UV, vec2(0.0, blur_factor *  0.0), texel_depth, dof_factor) * 1.0 +
+				sample(UV, vec2(0.0, blur_factor *  0.16), texel_depth, dof_factor) * 0.95 +
+				sample(UV, vec2(0.0, blur_factor *  0.33), texel_depth, dof_factor) * 0.9 +
+				sample(UV, vec2(0.0, blur_factor *  0.5), texel_depth, dof_factor) * 0.9 +
+				sample(UV, vec2(0.0, blur_factor *  0.66), texel_depth, dof_factor) * 0.7 +
+				sample(UV, vec2(0.0, blur_factor *  0.82), texel_depth, dof_factor) * 0.45 +
+				sample(UV, vec2(0.0, blur_factor *  1.0), texel_depth, dof_factor) * 0.2
+			)	/	9.2;
+
+			gl_FragColor = vec4(txl.rgb, 1.0 - min(dof_factor, 1.0));
+		}
+	">
+>
+
+<Shader =
+	<Name = "core::h_gaussian_blur">
+	<Vertex = "
+		void	main()
+		{
+			gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
+		}
+	">
+	<Pixel = "
+		uniform	vec2		inverse_buffer_size;
+		uniform	sampler2D	source;
+		uniform	float		blur_size, framebuffer_fx_scaler;
+
+		void	main()
+		{
+			vec2	UV = vec2(gl_FragCoord.x, gl_FragCoord.y) * inverse_buffer_size * framebuffer_fx_scaler;
+			float	blur_factor = blur_size / framebuffer_fx_scaler;
+
+			vec4	txl =	(
+						texture2D(source, UV + vec2(blur_factor * -1.0, blur_factor * -0.1)) * 0.25 +
+						texture2D(source, UV + vec2(blur_factor * -0.75, blur_factor * 0.1)) * 0.5 +
+						texture2D(source, UV + vec2(blur_factor * -0.5, blur_factor * -0.1)) * 0.75 +
+						texture2D(source, UV + vec2(blur_factor * -0.25, blur_factor * 0.1)) * 0.8 +
+						texture2D(source, UV + vec2(               0.0, blur_factor * -0.1)) * 1.0 +
+						texture2D(source, UV + vec2(blur_factor *  0.25, blur_factor * 0.1)) * 0.8 +
+						texture2D(source, UV + vec2(blur_factor *  0.5, blur_factor * -0.1)) * 0.75 +
+						texture2D(source, UV + vec2(blur_factor *  0.75, blur_factor * 0.1)) * 0.5 +
+						texture2D(source, UV + vec2(blur_factor *  1.0, blur_factor * -0.1)) * 0.25
+					) * (1.0 / 5.6);
+
+			gl_FragColor = txl;
+		}
+	">
+>
+
+<Shader =
+	<Name = "core::v_gaussian_blur">
+	<Vertex = "
+		void	main()
+		{
+			gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
+		}
+	">
+	<Pixel = "
+		uniform	vec2		inverse_buffer_size;
+		uniform	sampler2D	source;
+		uniform	float		blur_size, framebuffer_fx_scaler;
+
+		void	main()
+		{
+			vec2	UV = vec2(gl_FragCoord.x, gl_FragCoord.y) * inverse_buffer_size * framebuffer_fx_scaler;
+			float	blur_factor = blur_size / framebuffer_fx_scaler;
+
+			vec4	txl =	(
+						texture2D(source, UV + vec2(blur_factor * -0.1, blur_factor * -1.0)) * 0.25 +
+						texture2D(source, UV + vec2(blur_factor * 0.1, blur_factor * -0.75)) * 0.5 +
+						texture2D(source, UV + vec2(blur_factor * -0.1, blur_factor * -0.5)) * 0.75 +
+						texture2D(source, UV + vec2(blur_factor * 0.1, blur_factor * -0.25)) * 0.8 +
+						texture2D(source, UV + vec2(blur_factor * -0.1, 0.0)) * 1.0 +
+						texture2D(source, UV + vec2(blur_factor * 0.1, blur_factor *  0.25)) * 0.8 +
+						texture2D(source, UV + vec2(blur_factor * -0.1, blur_factor *  0.5)) * 0.75 +
+						texture2D(source, UV + vec2(blur_factor * 0.1, blur_factor *  0.75)) * 0.5 +
+						texture2D(source, UV + vec2(blur_factor * -0.1, blur_factor *  1.0)) * 0.25
+					) * (1.0 / 5.6);
+
+			gl_FragColor = txl;
+		}
+	">
+>
+
+<Shader =
+	<Name = "core::hdr_no_ldr">
+	<Vertex = "
+		void	main()
+		{
+			gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
+		}
+	">
+	<Pixel = "
+		uniform	vec2		inverse_buffer_size;
+		uniform	sampler2D	source;
+		uniform	float		framebuffer_fx_scaler;
+
+		void	main()
+		{
+			vec2	UV = vec2(gl_FragCoord.x, gl_FragCoord.y) * inverse_buffer_size * framebuffer_fx_scaler;
+			vec4	hdr = texture2D(source, UV);
+			gl_FragColor = vec4(hdr.x < 1.0 ? pow(hdr.x, 6.0) : hdr.x, hdr.y < 1.0 ? pow(hdr.y, 6.0) : hdr.y, hdr.z < 1.0 ? pow(hdr.z, 6.0) : hdr.z, 1.0);
+//					gl_FragColor = vec4(hdr.x < 1.0 ? 0.0 : hdr.x, hdr.y < 1.0 ? 0.0 : hdr.y, hdr.z < 1.0 ? 0.0 : hdr.z, 1.0);
+		}
+	">
+>
+
+<Shader =
+	<Name = "core::exposure_bloom">
+	<Vertex = "
+		void	main()
+		{
+			gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
+		}
+	">
+	<Pixel = "
+		uniform	vec2		inverse_buffer_size;
+		uniform	sampler2D	pp_input, bloom_map;
+
+		void	main()
+		{
+			vec2	UV = vec2(gl_FragCoord.x, gl_FragCoord.y) * inverse_buffer_size;
+			vec4	txl = texture2D(pp_input, UV) + texture2D(bloom_map, UV);
+
+			gl_FragColor = vec4(txl.xyz, 1.0);
+		}
+	">
+>
+
+<Shader =
+	<Name = "core::ati_glclear_workaround_shadowmap">
+	<Vertex = "
+		void	main()
+		{	gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;		}
+	">
+	<Pixel = "
+		uniform	vec4		clear_color;
+		void	main()
+		{	gl_FragColor = clear_color;	}
+	">
+>

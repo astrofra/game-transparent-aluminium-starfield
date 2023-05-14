@@ -1,0 +1,154 @@
+<NML=1.0>
+<Geometry=
+	<RenderWord>
+	<Vertex=
+		<Count=4>
+		<Data==48:48@
+***é***i*******i***i*******i***é*******é***é****>
+	>
+	<Polygon=
+		<Count=1>
+		<BindingCount=4>
+		<Data==24:24@
+.*******+***,***-*******>
+	>
+	<PNormal=
+		<Count=1>
+		<Data==3:3@
+**«>
+	>
+	<VNormal=
+		<Count=4>
+		<Data==12:12@
+**«**«**«**«>
+	>
+	<UV=
+		<Count=1>
+		<Data==32:32@
+**********ªi******ªi**ªi******ªi>
+	>
+	<Materials=
+		<Material=
+			<Id="background">
+			<Diffuse=
+				<X=0.000000>
+				<Y=0.000000>
+				<Z=0.000000>
+				<W=1.000000>
+			>
+			<AlphaThreshold=0.100000>
+			<PhysicMaterial=
+				<StaticFriction=0.750000>
+				<DynamicFriction=0.500000>
+				<Restitution=0.100000>
+			>
+			<RenderMask=
+				<Additive>
+				<FixedFunction>
+			>
+			<ShaderMap=
+				<Pos=
+					<X=10.000000>
+					<Y=221.000000>
+				>
+				<Map=
+					<Entry=
+						<Type="Geometry Normal">
+						<Pos=
+							<X=255.000000>
+							<Y=87.000000>
+						>
+						<Param>
+					>
+					<Entry=
+						<Type="Material Parameter">
+						<Pos=
+							<X=255.000000>
+							<Y=155.000000>
+						>
+						<Param=
+							<Param=0>
+						>
+					>
+					<Entry=
+						<Type="Material Parameter">
+						<Pos=
+							<X=255.000000>
+							<Y=223.000000>
+						>
+						<Param=
+							<Param=1>
+						>
+					>
+					<Entry=
+						<Type="Material Parameter">
+						<Pos=
+							<X=255.000000>
+							<Y=291.000000>
+						>
+						<Param=
+							<Param=4>
+						>
+					>
+					<Entry=
+						<Type="Material Parameter">
+						<Pos=
+							<X=255.000000>
+							<Y=359.000000>
+						>
+						<Param=
+							<Param=2>
+						>
+					>
+					<Entry=
+						<Type="Material Parameter">
+						<Pos=
+							<X=255.000000>
+							<Y=427.000000>
+						>
+						<Param=
+							<Param=5>
+						>
+					>
+				>
+				<Normal=
+					<Block=
+						<Index=0>
+					>
+				>
+				<Diffuse=
+					<Block=
+						<Index=1>
+					>
+				>
+				<Specular=
+					<Block=
+						<Index=2>
+					>
+				>
+				<Glossiness=
+					<Block=
+						<Index=3>
+					>
+				>
+				<Constant=
+					<Block=
+						<Index=4>
+					>
+				>
+				<Opacity=
+					<Block=
+						<Index=5>
+					>
+				>
+			>
+			<TextureStage=
+				<Index=0>
+				<Active>
+				<Texture="data/maps/flare.jpg">
+				<UV=0>
+				<Channel="SelfIllum">
+			>
+		>
+	>
+>

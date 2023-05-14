@@ -1,0 +1,290 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xml:lang="en" xmlns="http://www.w3.org/1999/xhtml"><head>
+
+
+<title>gsFramework - Devtool - Skinning the UI - gsDevtool</title>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta name="description" content="Redmine">
+<meta name="keywords" content="issue,bug,tracker">
+<link href="Skinning_the_UI_fichiers/application.css" media="all" rel="stylesheet" type="text/css">
+<script src="Skinning_the_UI_fichiers/prototype.js" type="text/javascript"></script>
+<script src="Skinning_the_UI_fichiers/effects.js" type="text/javascript"></script>
+<script src="Skinning_the_UI_fichiers/dragdrop.js" type="text/javascript"></script>
+<script src="Skinning_the_UI_fichiers/controls.js" type="text/javascript"></script>
+<script src="Skinning_the_UI_fichiers/application.js" type="text/javascript"></script>
+<link href="Skinning_the_UI_fichiers/jstoolbar.css" media="screen" rel="stylesheet" type="text/css">
+<!--[if IE]>
+    <style type="text/css">
+      * html body{ width: expression( document.documentElement.clientWidth < 900 ? '900px' : '100%' ); }
+      body {behavior: url(/stylesheets/csshover.htc?1231918849);}
+    </style>
+<![endif]-->
+
+<!-- page specific tags -->
+
+  <link href="Skinning_the_UI_fichiers/scm.css" media="screen" rel="stylesheet" type="text/css">
+</head><body>
+<div id="wrapper">
+<div id="top-menu">
+    <div id="account">
+        <ul><li><a href="http://dev.gsdevtool.com/my/account" class="my-account">My account</a></li>
+<li><a href="http://dev.gsdevtool.com/logout" class="logout">Sign out</a></li></ul>    </div>
+    <div id="loggedas">Logged in as <a href="http://dev.gsdevtool.com/account/show/5">fgutherz</a></div>
+    <ul><li><a href="http://dev.gsdevtool.com/" class="home">Home</a></li>
+<li><a href="http://dev.gsdevtool.com/my/page" class="my-page">My page</a></li>
+<li><a href="http://dev.gsdevtool.com/projects" class="projects">Projects</a></li>
+<li><a href="http://www.redmine.org/guide" class="help">Help</a></li></ul></div>
+      
+<div id="header">
+    <div id="quick-search">
+        <form action="/search/index/nedit" method="get">
+        <a href="http://dev.gsdevtool.com/search/index/nedit" accesskey="4">Search</a>:
+        <input accesskey="f" class="small" id="q" name="q" size="20" type="text">
+        </form>
+        <select onchange="if (this.value != '') { window.location = this.value; }"><option selected="selected">Jump to a project...</option><option disabled="disabled">---</option><option value="/projects/nedit?jump=wiki">gsFramework - Devtool</option></select>
+    </div>
+    
+    <h1>gsFramework - Devtool</h1>
+    
+    <div id="main-menu">
+        <ul><li><a href="http://dev.gsdevtool.com/projects/nedit" class="overview">Overview</a></li>
+<li><a href="http://dev.gsdevtool.com/projects/nedit/activity" class="activity">Activity</a></li>
+<li><a href="http://dev.gsdevtool.com/projects/nedit/roadmap" class="roadmap">Roadmap</a></li>
+<li><a href="http://dev.gsdevtool.com/projects/nedit/issues" class="issues">Issues</a></li>
+<li><a href="http://dev.gsdevtool.com/projects/nedit/issues/new" accesskey="7" class="new-issue">New issue</a></li>
+<li><a href="http://dev.gsdevtool.com/projects/nedit/news" class="news">News</a></li>
+<li><a href="http://dev.gsdevtool.com/projects/nedit/documents" class="documents">Documents</a></li>
+<li><a href="http://dev.gsdevtool.com/projects/nedit/wiki" class="wiki selected">Wiki</a></li>
+<li><a href="http://dev.gsdevtool.com/projects/nedit/boards" class="boards">Forums</a></li>
+<li><a href="http://dev.gsdevtool.com/projects/nedit/files" class="files">Files</a></li>
+<li><a href="http://dev.gsdevtool.com/projects/nedit/repository" class="repository">Repository</a></li>
+<li><a href="http://dev.gsdevtool.com/projects/nedit/settings" class="settings">Settings</a></li></ul>
+    </div>
+</div>
+
+<div class="" id="main">
+    <div id="sidebar">        
+        
+  <h3>Wiki</h3>
+
+<a href="http://dev.gsdevtool.com/projects/nedit/wiki">Start page</a><br>
+<a href="http://dev.gsdevtool.com/projects/nedit/wiki/Page_index">Index by title</a><br>
+<a href="http://dev.gsdevtool.com/projects/nedit/wiki/Date_index">Index by date</a><br>
+
+
+        
+    </div>
+    
+    <div id="content">
+				
+        <div class="contextual">
+
+<a href="http://dev.gsdevtool.com/projects/nedit/wiki/Skinning_the_UI/edit" accesskey="e" class="icon icon-edit">Edit</a>
+<span id="watcher"><a class="icon icon-fav-off" href="http://dev.gsdevtool.com/watchers/watch?object_id=62&amp;object_type=wiki_page" onclick="new Ajax.Request('/watchers/watch?object_id=62&amp;object_type=wiki_page', {asynchronous:true, evalScripts:true}); return false;">Watch</a></span>
+<a href="http://dev.gsdevtool.com/projects/nedit/wiki/Skinning_the_UI/protect?protected=1" class="icon icon-lock" onclick="var f = document.createElement('form'); f.style.display = 'none'; this.parentNode.appendChild(f); f.method = 'POST'; f.action = this.href;f.submit();return false;">Lock</a>
+
+<a href="http://dev.gsdevtool.com/projects/nedit/wiki/Skinning_the_UI/rename" class="icon icon-move">Rename</a>
+<a href="http://dev.gsdevtool.com/projects/nedit/wiki/Skinning_the_UI/destroy" class="icon icon-del" onclick="if (confirm('Are you sure ?')) { var f = document.createElement('form'); f.style.display = 'none'; this.parentNode.appendChild(f); f.method = 'POST'; f.action = this.href;f.submit(); };return false;">Delete</a>
+
+
+<a href="http://dev.gsdevtool.com/projects/nedit/wiki/Skinning_the_UI/history" class="icon icon-history">History</a>
+</div>
+
+
+
+
+
+<div class="wiki">
+  <h1 id="Skinning-the-UI">Skinning the UI<a href="#Skinning-the-UI" class="wiki-anchor">¶</a></h1>
+
+
+	<h1 id="Customize-the-mouse-cursor">Customize the mouse cursor<a href="#Customize-the-mouse-cursor" class="wiki-anchor">¶</a></h1>
+
+
+	<p>TODO</p>
+
+
+<pre>    UISetCursor(ui, "ui/cursor.tga");
+</pre>
+
+	<h2 id="Skin-system">Skin system<a href="#Skin-system" class="wiki-anchor">¶</a></h2>
+
+
+<pre>    UISetSkin    (
+                            ui, "ui/skin/t.tga", "ui/skin/l.tga", "ui/skin/r.tga", "ui/skin/b.tga",
+                            "ui/skin/tl.tga", "ui/skin/tr.tga", "ui/skin/bl.tga", "ui/skin/br.tga", 0x202020ff,
+                            0xffffffff, 10, 34, 24, "Default" 
+                        );
+</pre>
+
+	<table>
+		<tbody><tr>
+			<td> tl.tga </td>
+			<td> t.tga </td>
+			<td> tr.tga </td>
+		</tr>
+		<tr>
+			<td> l.tga </td>
+			<td> </td>
+			<td> r.tga </td>
+		</tr>
+		<tr>
+			<td> bl.tga </td>
+			<td> b.tga </td>
+			<td> br.tga </td>
+		</tr>
+	</tbody></table>
+
+
+
+
+	<table>
+		<tbody><tr>
+			<td> <img src="Skinning_the_UI_fichiers/137.jpg" alt=""> </td>
+			<td> <img src="Skinning_the_UI_fichiers/138.jpg" alt=""> </td>
+			<td> <img src="Skinning_the_UI_fichiers/140.jpg" alt=""> </td>
+		</tr>
+		<tr>
+			<td> <img src="Skinning_the_UI_fichiers/146.jpg" alt=""> </td>
+			<td>  </td>
+			<td> <img src="Skinning_the_UI_fichiers/147.jpg" alt=""> </td>
+		</tr>
+		<tr>
+			<td> <img src="Skinning_the_UI_fichiers/143.jpg" alt=""> </td>
+			<td> <img src="Skinning_the_UI_fichiers/144.jpg" alt=""> </td>
+			<td> <img src="Skinning_the_UI_fichiers/145.jpg" alt=""> </td>
+		</tr>
+	</tbody></table>
+</div>
+
+
+<div class="attachments">
+
+<p><a href="http://dev.gsdevtool.com/attachments/137/tl.JPG" class="icon icon-attachment">tl.JPG</a>
+  <span class="size">(1.2 KB)</span>
+  
+    <a href="http://dev.gsdevtool.com/attachments/destroy/137" class="delete" onclick="if (confirm('Are you sure ?')) { var f = document.createElement('form'); f.style.display = 'none'; this.parentNode.appendChild(f); f.method = 'POST'; f.action = this.href;f.submit(); };return false;" title="Delete"><img alt="Delete" src="Skinning_the_UI_fichiers/delete.png"></a>
+  
+  
+    <span class="author">François Gutherz, 04/02/2009 09:08 pm</span>
+  
+  </p>
+
+<p><a href="http://dev.gsdevtool.com/attachments/138/t.JPG" class="icon icon-attachment">t.JPG</a>
+  <span class="size">(2.6 KB)</span>
+  
+    <a href="http://dev.gsdevtool.com/attachments/destroy/138" class="delete" onclick="if (confirm('Are you sure ?')) { var f = document.createElement('form'); f.style.display = 'none'; this.parentNode.appendChild(f); f.method = 'POST'; f.action = this.href;f.submit(); };return false;" title="Delete"><img alt="Delete" src="Skinning_the_UI_fichiers/delete.png"></a>
+  
+  
+    <span class="author">François Gutherz, 04/02/2009 09:08 pm</span>
+  
+  </p>
+
+<p><a href="http://dev.gsdevtool.com/attachments/140/tr.JPG" class="icon icon-attachment">tr.JPG</a>
+  <span class="size">(1.1 KB)</span>
+  
+    <a href="http://dev.gsdevtool.com/attachments/destroy/140" class="delete" onclick="if (confirm('Are you sure ?')) { var f = document.createElement('form'); f.style.display = 'none'; this.parentNode.appendChild(f); f.method = 'POST'; f.action = this.href;f.submit(); };return false;" title="Delete"><img alt="Delete" src="Skinning_the_UI_fichiers/delete.png"></a>
+  
+  
+    <span class="author">François Gutherz, 04/02/2009 09:09 pm</span>
+  
+  </p>
+
+<p><a href="http://dev.gsdevtool.com/attachments/143/bl.JPG" class="icon icon-attachment">bl.JPG</a>
+  <span class="size">(1.2 KB)</span>
+  
+    <a href="http://dev.gsdevtool.com/attachments/destroy/143" class="delete" onclick="if (confirm('Are you sure ?')) { var f = document.createElement('form'); f.style.display = 'none'; this.parentNode.appendChild(f); f.method = 'POST'; f.action = this.href;f.submit(); };return false;" title="Delete"><img alt="Delete" src="Skinning_the_UI_fichiers/delete.png"></a>
+  
+  
+    <span class="author">François Gutherz, 04/02/2009 09:09 pm</span>
+  
+  </p>
+
+<p><a href="http://dev.gsdevtool.com/attachments/144/b.JPG" class="icon icon-attachment">b.JPG</a>
+  <span class="size">(2.6 KB)</span>
+  
+    <a href="http://dev.gsdevtool.com/attachments/destroy/144" class="delete" onclick="if (confirm('Are you sure ?')) { var f = document.createElement('form'); f.style.display = 'none'; this.parentNode.appendChild(f); f.method = 'POST'; f.action = this.href;f.submit(); };return false;" title="Delete"><img alt="Delete" src="Skinning_the_UI_fichiers/delete.png"></a>
+  
+  
+    <span class="author">François Gutherz, 04/02/2009 09:09 pm</span>
+  
+  </p>
+
+<p><a href="http://dev.gsdevtool.com/attachments/145/br.JPG" class="icon icon-attachment">br.JPG</a>
+  <span class="size">(1 KB)</span>
+  
+    <a href="http://dev.gsdevtool.com/attachments/destroy/145" class="delete" onclick="if (confirm('Are you sure ?')) { var f = document.createElement('form'); f.style.display = 'none'; this.parentNode.appendChild(f); f.method = 'POST'; f.action = this.href;f.submit(); };return false;" title="Delete"><img alt="Delete" src="Skinning_the_UI_fichiers/delete.png"></a>
+  
+  
+    <span class="author">François Gutherz, 04/02/2009 09:09 pm</span>
+  
+  </p>
+
+<p><a href="http://dev.gsdevtool.com/attachments/146/_l.JPG" class="icon icon-attachment">_l.JPG</a>
+  <span class="size">(2.5 KB)</span>
+  
+    <a href="http://dev.gsdevtool.com/attachments/destroy/146" class="delete" onclick="if (confirm('Are you sure ?')) { var f = document.createElement('form'); f.style.display = 'none'; this.parentNode.appendChild(f); f.method = 'POST'; f.action = this.href;f.submit(); };return false;" title="Delete"><img alt="Delete" src="Skinning_the_UI_fichiers/delete.png"></a>
+  
+  
+    <span class="author">François Gutherz, 04/02/2009 09:11 pm</span>
+  
+  </p>
+
+<p><a href="http://dev.gsdevtool.com/attachments/147/_r.JPG" class="icon icon-attachment">_r.JPG</a>
+  <span class="size">(2.3 KB)</span>
+  
+    <a href="http://dev.gsdevtool.com/attachments/destroy/147" class="delete" onclick="if (confirm('Are you sure ?')) { var f = document.createElement('form'); f.style.display = 'none'; this.parentNode.appendChild(f); f.method = 'POST'; f.action = this.href;f.submit(); };return false;" title="Delete"><img alt="Delete" src="Skinning_the_UI_fichiers/delete.png"></a>
+  
+  
+    <span class="author">François Gutherz, 04/02/2009 09:11 pm</span>
+  
+  </p>
+
+</div>
+
+
+
+<div id="wiki_add_attachment">
+<p><a href="http://dev.gsdevtool.com/projects/nedit/wiki/Skinning_the_UI" id="attach_files_link" onclick="Element.show('add_attachment_form'); Element.hide(this); Element.scrollTo('add_attachment_form'); return false;">New file</a></p>
+<form action="/wiki/nedit/Skinning_the_UI/add_attachment" enctype="multipart/form-data" id="add_attachment_form" method="post" style="display: none;">
+  <div class="box">
+  <p><span id="attachments_fields">
+<input name="attachments[1][file]" size="30" type="file"><input name="attachments[1][description]" size="60" type="text">
+<em>Optional description</em>
+</span>
+<br>
+<small><a href="#" onclick="addFileField(); return false;">Add another file</a>
+(Maximum size: 15.6 MB)
+</small>
+</p>
+  </div>
+<input name="commit" value="Add" type="submit">
+<a href="http://dev.gsdevtool.com/projects/nedit/wiki/Skinning_the_UI" onclick="Element.hide('add_attachment_form'); Element.show('attach_files_link'); return false;">Cancel</a>
+</form>
+</div>
+
+
+<p class="other-formats">Also available in:
+	<span><a href="http://dev.gsdevtool.com/projects/nedit/wiki/Skinning_the_UI?format=html&amp;version=5" class="html" rel="nofollow">HTML</a></span>
+	<span><a href="http://dev.gsdevtool.com/projects/nedit/wiki/Skinning_the_UI?format=txt&amp;version=5" class="txt" rel="nofollow">TXT</a></span>
+</p>
+
+
+
+
+
+
+
+        
+				<div style="clear: both;"></div>
+    </div>
+</div>
+
+<div id="ajax-indicator" style="display: none;"><span>Loading...</span></div>
+	
+<div id="footer">
+    Powered by <a href="http://www.redmine.org/">Redmine</a> © 2006-2009 Jean-Philippe Lang
+</div>
+</div>
+
+</body></html>

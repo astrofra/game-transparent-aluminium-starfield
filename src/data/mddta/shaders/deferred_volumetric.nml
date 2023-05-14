@@ -1,0 +1,210 @@
+<NML = 1.0>
+
+<Shader =
+	<Name = "core::volumetric_cone">
+
+	<Vertex = "
+		varying	vec3		forward;
+		void	main()
+		{
+			gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
+			forward = (gl_ModelViewMatrix * gl_Vertex).xyz;
+		}
+	">
+
+	<Pixel = "
+		varying	vec3		forward;
+		uniform	vec2		inverse_buffer_size;
+		uniform	float		view_depth_offset;
+
+		uniform vec3		volumetric_color,
+							position_view_space,
+							direction_view_space;
+
+		uniform	float		cone_angle,
+							volumetric_thickness;
+
+		uniform	sampler2D	gbuffer0;
+
+		//------------
+		void	main()
+		{
+			vec2	UV = vec2(gl_FragCoord.x, gl_FragCoord.y) * inverse_buffer_size;
+			vec4	norm_dpth = texture2D(gbuffer0, UV);
+			vec3	frag_viewpos = (forward / forward.z) * (norm_dpth.w + view_depth_offset);
+
+			// Compute ray entry and exit points.
+			vec3	direction_ray = normalize(frag_viewpos);
+			float	fAdD = dot(direction_view_space, direction_ray),
+					fCosSqr = cone_angle * cone_angle;
+
+			vec3	kE = -position_view_space;
+
+			float	fAdE = dot(direction_view_space, kE),
+					fDdE = dot(direction_ray, kE),
+					fEdE = dot(kE, kE);
+			float	fC2 = fAdD * fAdD - fCosSqr,
+					fC1 = fAdD * fAdE - fCosSqr * fDdE,
+					fC0 = fAdE * fAdE - fCosSqr * fEdE;
+
+			float	fDiscr = fC1 * fC1 - fC0 * fC2;
+			if	(fDiscr <= 0.0)
+				discard;
+
+			float	fRoot = sqrt(fDiscr),
+					fInvC2 = 1.0 / fC2;
+			float	fT0 = (-fC1 + fRoot) * fInvC2,
+					fT1 = fC2 < 0.0 ? (-fC1 - fRoot) * fInvC2 : 2000.0;
+
+			vec3	entry_point = fT0 * direction_ray;
+
+			if	(dot(position_view_space - entry_point, direction_view_space) > 0.0)
+				discard;
+
+			// Sample volume.
+			float   thickness = (min(length(frag_viewpos), fT1) - fT0) / volumetric_thickness;
+			gl_FragColor = vec4(volumetric_color.rgb, thickness);
+		}
+	">
+>
+
+<Shader =
+	<Name = "core::volumetric_cone_shadowmap">
+
+	<Vertex = "
+		varying	vec3		forward;
+		void	main()
+		{
+			gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
+			forward = (gl_ModelViewMatrix * gl_Vertex).xyz;
+		}
+	">
+
+	<Pixel = "
+		varying	vec3		forward;
+
+		uniform	vec2		inverse_buffer_size;
+		uniform	float		view_depth_offset,
+							shadow_bias;
+
+		uniform vec3		volumetric_color,
+							position_view_space,
+							direction_view_space;
+
+		uniform	float		cone_angle,
+							inverse_shadowmap_size,
+							volumetric_range,
+							volumetric_step,
+							volumetric_thickness;
+
+		uniform	sampler2D	gbuffer0;
+		uniform	sampler2DShadow	volume_view_depth_texture;
+
+		uniform	mat4		volume_projection_matrix;
+
+		//---------------------------
+		float	EvaluatePCF(vec3 pjb)
+		{
+/*
+			// 2x2 PCF TAP.
+			float	pcf_tap = 0.0;
+			for (float v = 0; v < 2.0; ++v)
+				for (float u = 0; u < 2.0; ++u)
+					pcf_tap += shadow2D(volume_view_depth_texture, pjb + vec3(u, v, 0.0) * inverse_shadowmap_size).r;
+
+			return pcf_tap / 4.0;
+*/
+			return shadow2D(volume_view_depth_texture, pjb).r;
+		}
+
+		//------------
+		void	main()
+		{
+			vec2	UV = vec2(gl_FragCoord.x, gl_FragCoord.y) * inverse_buffer_size;
+			vec4	norm_dpth = texture2D(gbuffer0, UV);
+			vec3	frag_viewpos = (forward / forward.z) * (norm_dpth.w + view_depth_offset - shadow_bias);
+
+			// Compute ray entry and exit points.
+			vec3	direction_ray = normalize(frag_viewpos);
+			float	fAdD = dot(direction_view_space, direction_ray),
+					fCosSqr = cone_angle * cone_angle;
+
+			vec3	kE = -position_view_space;
+
+			float	fAdE = dot(direction_view_space, kE),
+					fDdE = dot(direction_ray, kE),
+					fEdE = dot(kE, kE);
+			float	fC2 = fAdD * fAdD - fCosSqr,
+					fC1 = fAdD * fAdE - fCosSqr * fDdE,
+					fC0 = fAdE * fAdE - fCosSqr * fEdE;
+
+			float	fDiscr = fC1 * fC1 - fC0 * fC2;
+			if	(fDiscr < 0.0)
+				discard;
+
+			float	fRoot = sqrt(fDiscr),
+					fInvC2 = 1.0 / fC2;
+			float	fT0 = (-fC1 + fRoot) * fInvC2,
+					fT1 = (-fC1 - fRoot) * fInvC2;
+
+			// Trace correct cone.
+			float	k0 = dot(position_view_space - fT0 * direction_ray, direction_view_space),
+					k1 = dot(position_view_space - fT1 * direction_ray, direction_view_space);
+			if	((k0 > 0.0) && (k1 > 0.0))
+				discard;
+
+			if	(fC2 > 0.0)
+			{
+				if	(k0 > 0.0)
+					fT0 = 0.0;
+				if	(k1 > 0.0)
+					fT1 = 64000.0;
+			}
+
+			// Cap cone at range.
+			if	(volumetric_range > 0.0)
+			{
+				float	t = dot(position_view_space + direction_view_space * volumetric_range, direction_view_space) / fAdD;
+
+				// Which side of the plane is view on.
+				if	(fAdD >= 0.0)	// Cone origin side.
+					fT1 = min(t, fT1);
+				else				// Outside cone space.
+					fT0 = max(t, fT0);
+			}
+
+			// Sample volume.
+			fT0 = max(0.0, fT0);
+
+			vec3	sample = direction_ray * fT0;
+			float	sample_length = 0.0,
+					frag_length = length(frag_viewpos),
+					max_length = min(frag_length, fT1) - fT0;
+			vec3	sample_step = direction_ray * volumetric_step;
+
+			float   thickness = (min(frag_length, fT1) - fT0) / volumetric_thickness;
+
+			float	total_contribution = 0.0,
+					contribution = volumetric_step / volumetric_thickness;
+
+			float	max_step = 0.0;
+			while	(sample_length < max_length)
+			{
+				sample += sample_step;
+				sample_length += volumetric_step;
+
+				vec4	frag_lightpos = volume_projection_matrix * vec4(sample, 1.0);
+				vec3	pj_biased = ((frag_lightpos.xyz / frag_lightpos.w) + 1.0) * 0.5;
+				total_contribution += contribution * EvaluatePCF(pj_biased);
+
+				max_step += 1.0;
+				if	(max_step > 1000.0)
+					break;
+			}
+
+			// Adjust sample length to exact intersection.
+//			thickness -= (sample_length - max_length) / volumetric_thickness;
+			gl_FragColor = vec4(volumetric_color.rgb * total_contribution, thickness);
+		}
+	">
+>
