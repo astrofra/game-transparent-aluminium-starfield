@@ -6,15 +6,15 @@ _Transparent Aluminium Starfield_ is an asteroids-like game prototype made for t
 
 ![screenshot](img/transparent-aluminium-starfield-preview.png)
 
-The BIGJam proposed a session of 3 hours coding for each game, on a collective theme. IIRC, the theme was `Transparent Aluminium` or something like that. Sven, Brandon and myself decided about the title of the game then started designing stuff...
+The BIGJam proposed a session of 3 hours coding for each game, on a collective theme. IIRC, the theme was `Transparent Aluminium` or something like that. ptoing, Bee and myself decided about the title of the game then started designing stuff...
 
 The game is implemented in [Squirrel](https://github.com/albertodemichelis/squirrel), based on a custom engine (aka GameStart3D).
 
 ## Credits
 
-- Graphics: Ptoing
-- Music: BMcC
-- Code: Astrofra
+- Graphics: ptoing
+- Music: Bee
+- Code: astrofra
 
 ## About BIGJam (Berlin Indie Game Jam) :tiger:
 
